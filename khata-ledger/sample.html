@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .total-card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .total-card.debtors {
+            border-left: 4px solid #22c55e;
+        }
+
+        .total-card.creditors {
+            border-left: 4px solid #ef4444;
+        }
+
+        .total-card h3 {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .total-card .amount {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: #1e293b;
+            border: none;
+            color: #94a3b8;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .form {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+        }
+
+        input,
+        textarea {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        textarea {
+            grid-column: 1 / -1;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        button.secondary {
+            background: #475569;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .card-info h4 {
+            margin-bottom: 4px;
+        }
+
+        .card-info .notes {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .card-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #64748b;
+            padding: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .form {
+                grid-template-columns: 1fr;
+            }
+
+            .totals {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Debt Tracker</h1>
+        <p class="subtitle">Track who owes you and whom you owe</p>
+
+        <div class="totals">
+            <div class="total-card debtors">
+                <h3>You are owed</h3>
+                <div class="amount" id="totalDebtors">₹0</div>
+            </div>
+            <div class="total-card creditors">
+                <h3>You owe</h3>
+                <div class="amount" id="totalCreditors">₹0</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('debtors')">Debtors</button>
+            <button class="tab" onclick="switchTab('creditors')">Creditors</button>
+        </div>
+
+        <div class="form">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="number" id="amount" placeholder="Amount" min="0" step="0.01" required>
+            <button onclick="saveEntry()">Save</button>
+            <textarea id="notes" placeholder="Notes (optional)"></textarea>
+        </div>
+
+        <div class="list" id="list"></div>
+    </div>
+
+    <script>
+        let currentTab = 'debtors';
+        let editId = null;
+
+        function loadData() {
+            return {
+                debtors: JSON.parse(localStorage.getItem('debtors') || '[]'),
+                creditors: JSON.parse(localStorage.getItem('creditors') || '[]')
+            };
+        }
+
+        function saveData(data) {
+            localStorage.setItem('debtors', JSON.stringify(data.debtors));
+            localStorage.setItem('creditors', JSON.stringify(data.creditors));
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            editId = null;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            clearForm();
+            render();
+        }
+
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('notes').value = '';
+            editId = null;
+        }
+
+        function saveEntry() {
+            const name = document.getElementById('name').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!name || isNaN(amount) || amount < 0) {
+                alert('Please enter a valid name and amount');
+                return;
+            }
+
+            const data = loadData();
+            const entry = { id: editId || Date.now(), name, amount, notes };
+
+            if (editId) {
+                const list = data[currentTab];
+                const idx = list.findIndex(e => e.id === editId);
+                if (idx !== -1) list[idx] = entry;
+            } else {
+                data[currentTab].push(entry);
+            }
+
+            saveData(data);
+            clearForm();
+            render();
+        }
+
+        function editEntry(id) {
+            const data = loadData();
+            const entry = data[currentTab].find(e => e.id === id);
+            if (!entry) return;
+
+            document.getElementById('name').value = entry.name;
+            document.getElementById('amount').value = entry.amount;
+            document.getElementById('notes').value = entry.notes || '';
+            editId = id;
+        }
+
+        function deleteEntry(id) {
+            if (!confirm('Delete this entry?')) return;
+            const data = loadData();
+            data[currentTab] = data[currentTab].filter(e => e.id !== id);
+            saveData(data);
+            render();
+        }
+
+        function render() {
+            const data = loadData();
+            const list = data[currentTab];
+            const container = document.getElementById('list');
+
+            // Totals
+            const totalDebtors = data.debtors.reduce((s, e) => s + e.amount, 0);
+            const totalCreditors = data.creditors.reduce((s, e) => s + e.amount, 0);
+            document.getElementById('totalDebtors').textContent = '₹' + totalDebtors.toLocaleString('en-IN');
+            document.getElementById('totalCreditors').textContent = '₹' + totalCreditors.toLocaleString('en-IN');
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="empty">No ${currentTab} yet. Add one above.</div>`;
+                return;
+            }
+
+            container.innerHTML = list
+                .sort((a, b) => b.amount - a.amount)
+                .map(e => `
+          <div class="card">
+            <div class="card-info">
+              <h4>${e.name}</h4>
+              ${e.notes ? `<div class="notes">${e.notes}</div>` : ''}
+            </div>
+            <div class="card-amount">₹${e.amount.toLocaleString('en-IN')}</div>
+            <div class="card-actions">
+              <button class="secondary" onclick="editEntry(${e.id})">Edit</button>
+              <button class="danger" onclick="deleteEntry(${e.id})">Delete</button>
+            </div>
+          </div>
+        `).join('');
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+
+</html>

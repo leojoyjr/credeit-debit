@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+
+# SQLite Database and WAL journals
+data/*.db
+data/*.db-wal
+data/*.db-shm
+*.db
+*.db-wal
+*.db-shm
+
+# Backups and Uploads
+backups/*.db
+uploads/*
+!uploads/.gitkeep
+!backups/.gitkeep
+!data/.gitkeep
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db

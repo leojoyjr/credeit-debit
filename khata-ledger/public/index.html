@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Khata Ledger - Digital Account Book</title>
+  <meta name="description" content="Production-ready digital ledger and credit account book for small businesses.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-icon">ख</div>
+      <div>
+        <div id="header-business-name" class="logo-title">Khata Ledger</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Dark / Light theme toggle -->
+      <button id="theme-toggle-btn" class="btn-icon" aria-label="Toggle Dark / Light Theme" title="Toggle Theme">
+        🌓
+      </button>
+
+      <!-- User Profile Badge -->
+      <div id="user-badge" class="user-badge" style="display: none;">
+        <span id="user-name-display">Leo</span>
+        <span id="user-role-display" class="role-tag role-owner">OWNER</span>
+      </div>
+
+      <!-- Logout Button -->
+      <button id="logout-btn" class="btn-icon" aria-label="Log Out" title="Log Out" style="display: none;">
+        🚪
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="container">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">To Collect (Receivable)</span>
+          <span id="kpi-receivable" class="kpi-value kpi-receivable">₹ 0.00</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">To Pay (Payable)</span>
+          <span id="kpi-payable" class="kpi-value kpi-payable">₹ 0.00</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Net Balance Position</span>
+          <span id="kpi-net" class="kpi-value kpi-net">₹ 0.00</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Overdue Bills</span>
+          <span id="kpi-overdue" class="kpi-value kpi-overdue">₹ 0.00</span>
+        </div>
+      </div>
+
+      <!-- Ageing Report Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Receivables Ageing Breakdown</span>
+          <button id="toggle-ageing-type-btn" class="btn btn-outline" style="min-height: 32px; padding: 4px 10px; font-size: 12px;">
+            Switch to Payables
+          </button>
+        </div>
+        <div id="ageing-container">
+          <div class="ageing-row">
+            <div class="ageing-info"><span>0 - 30 Days (Current)</span><span id="ageing-0-30">₹ 0.00</span></div>
+            <div class="progress-bar-bg"><div id="bar-0-30" class="progress-bar-fill fill-0-30" style="width: 0%;"></div></div>
+          </div>
+          <div class="ageing-row">
+            <div class="ageing-info"><span>31 - 60 Days</span><span id="ageing-31-60">₹ 0.00</span></div>
+            <div class="progress-bar-bg"><div id="bar-31-60" class="progress-bar-fill fill-31-60" style="width: 0%;"></div></div>
+          </div>
+          <div class="ageing-row">
+            <div class="ageing-info"><span>61 - 90 Days</span><span id="ageing-61-90">₹ 0.00</span></div>
+            <div class="progress-bar-bg"><div id="bar-61-90" class="progress-bar-fill fill-61-90" style="width: 0%;"></div></div>
+          </div>
+          <div class="ageing-row">
+            <div class="ageing-info"><span>90+ Days (Critical)</span><span id="ageing-90-plus">₹ 0.00</span></div>
+            <div class="progress-bar-bg"><div id="bar-90-plus" class="progress-bar-fill fill-90-plus" style="width: 0%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Debtors & Creditors Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px;">
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">Top Debtors (Customers Who Owe)</div>
+          <div id="top-debtors-list" style="font-size: 13px;">No debtors yet.</div>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">Top Creditors (Suppliers We Owe)</div>
+          <div id="top-creditors-list" style="font-size: 13px;">No creditors yet.</div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-title">Recent Transactions Across Store</div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Party</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tx-tbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No transactions recorded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PARTIES VIEW -->
+    <section id="view-parties" class="view-section" style="display: none;">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <input type="text" id="party-search-input" class="form-input" placeholder="🔍 Search by name, phone, GSTIN..." style="flex: 1;">
+        <button id="open-add-party-btn" class="btn btn-primary" style="white-space: nowrap;">+ Add Party</button>
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="filter-pills">
+        <button class="filter-pill active" data-type="all">All</button>
+        <button class="filter-pill" data-type="customer">Customers</button>
+        <button class="filter-pill" data-type="supplier">Suppliers</button>
+        <button class="filter-pill" data-status="owes_us">They Owe Us</button>
+        <button class="filter-pill" data-status="we_owe">We Owe Them</button>
+        <button class="filter-pill" data-status="advance">Advance</button>
+      </div>
+
+      <!-- Party List Cards -->
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div id="parties-list-container">
+          <!-- Dynamically populated party items -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. PER-PARTY LEDGER STATEMENT VIEW -->
+    <section id="view-ledger" class="view-section" style="display: none;">
+      <button id="back-to-parties-btn" class="btn btn-outline" style="margin-bottom: 12px; min-height: 36px; padding: 4px 12px;">
+        ← Back to Parties
+      </button>
+
+      <div class="card" id="ledger-party-header">
+        <!-- Dynamically rendered party summary -->
+      </div>
+
+      <!-- Statement Actions Bar -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+        <button id="statement-pdf-btn" class="btn btn-primary">📄 Download PDF</button>
+        <button id="statement-print-btn" class="btn btn-outline">🖨️ Print</button>
+        <button id="statement-whatsapp-btn" class="btn btn-whatsapp">💬 WhatsApp Reminder</button>
+        <button id="statement-new-tx-btn" class="btn btn-success">+ Add Entry</button>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="card" style="padding: 12px; margin-bottom: 12px;">
+        <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 130px;">
+            <label class="form-label" style="font-size: 11px;">From Date</label>
+            <input type="date" id="ledger-from-date" class="form-input" style="min-height: 36px; padding: 6px;">
+          </div>
+          <div style="flex: 1; min-width: 130px;">
+            <label class="form-label" style="font-size: 11px;">To Date</label>
+            <input type="date" id="ledger-to-date" class="form-input" style="min-height: 36px; padding: 6px;">
+          </div>
+          <button id="ledger-filter-apply-btn" class="btn btn-outline" style="min-height: 36px; padding: 6px 12px;">Apply</button>
+          <button id="ledger-filter-reset-btn" class="btn btn-outline" style="min-height: 36px; padding: 6px 12px;">Reset</button>
+        </div>
+      </div>
+
+      <!-- Statement Table -->
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+          <table class="table" id="statement-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Details & Ref</th>
+                <th style="text-align: right;">Debit (+)</th>
+                <th style="text-align: right;">Credit (-)</th>
+                <th style="text-align: right;">Balance</th>
+                <th style="text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="statement-tbody">
+              <!-- Dynamically populated entries -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. REPORTS & DATA VIEW -->
+    <section id="view-reports" class="view-section" style="display: none;">
+      <!-- Monthly Summary -->
+      <div class="card">
+        <div class="card-title">Monthly Business Performance</div>
+        <div id="monthly-summary-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- CSV Export Options (Owner only) -->
+      <div class="card">
+        <div class="card-title">Export Accounting Data (CSV)</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a id="export-parties-btn" href="/api/reports/parties/csv" class="btn btn-outline" download>📥 Export Parties CSV</a>
+          <a id="export-transactions-btn" href="/api/reports/transactions/csv" class="btn btn-outline" download>📥 Export Transactions CSV</a>
+          <a id="export-ageing-btn" href="/api/reports/ageing/csv" class="btn btn-outline" download>📥 Export Ageing CSV</a>
+        </div>
+      </div>
+
+      <!-- CSV Import with live preview before commit -->
+      <div class="card">
+        <div class="card-title">Import Parties & Opening Balances (CSV)</div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Upload a CSV with headers: <code>name, type, phone, email, tax_id, opening_balance, credit_limit, payment_terms</code>.
+          You will preview all rows and any validation issues before saving.
+        </p>
+        <div class="form-group">
+          <input type="file" id="csv-file-input" accept=".csv,text/csv" class="form-input">
+        </div>
+        <div id="csv-preview-container" style="display: none; margin-top: 14px;">
+          <!-- Preview Table & commit button -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SETTINGS & BACKUPS VIEW -->
+    <section id="view-settings" class="view-section" style="display: none;">
+      <!-- Business Profile Form -->
+      <div class="card">
+        <div class="card-title">Business Profile & Rules</div>
+        <form id="settings-form">
+          <div class="form-group">
+            <label class="form-label">Business Name</label>
+            <input type="text" id="setting-business-name" class="form-input" required>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Currency Symbol</label>
+              <input type="text" id="setting-currency-symbol" class="form-input" placeholder="₹" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Default Tax Rate (%)</label>
+              <input type="number" id="setting-tax-rate" class="form-input" placeholder="18" step="0.1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp Reminder Message Template</label>
+            <textarea id="setting-reminder-template" class="form-textarea" rows="3"></textarea>
+            <span style="font-size: 11px; color: var(--text-muted);">Available variables: {party_name}, {amount}, {business_name}</span>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+      </div>
+
+      <!-- User Management (Owner only) -->
+      <div class="card" id="user-management-card">
+        <div class="card-title">
+          <span>Manage Staff Users</span>
+          <button id="open-add-user-btn" class="btn btn-outline" style="min-height: 32px; padding: 4px 10px; font-size: 12px;">+ Add User</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Database Backups & Restore -->
+      <div class="card" id="backup-management-card">
+        <div class="card-title">
+          <span>Database Backups & Safety</span>
+          <button id="backup-now-btn" class="btn btn-success" style="min-height: 32px; padding: 4px 10px; font-size: 12px;">💾 Backup Now</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Automatic daily backups are archived in <code>backups/</code> with the last 30 retained. You can trigger an instant backup or download anytime.
+        </p>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Backup File</th>
+                <th>Size</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="backups-table-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Audit Log Viewer -->
+      <div class="card" id="audit-log-card">
+        <div class="card-title">Security & Action Audit Log</div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Entity</th>
+              </tr>
+            </thead>
+            <tbody id="audit-log-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Mobile First) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-nav="dashboard">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" data-nav="parties">
+      <span class="nav-icon">👥</span>
+      <span>Parties</span>
+    </button>
+    
+    <!-- Fast-Add 3-Tap FAB in center -->
+    <button id="fast-add-fab" class="fast-add-fab" aria-label="Fast Entry Transaction" title="Record Transaction">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+
+    <button class="nav-item" data-nav="reports">
+      <span class="nav-icon">📈</span>
+      <span>Reports</span>
+    </button>
+    <button class="nav-item" data-nav="settings">
+      <span class="nav-icon">⚙️</span>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: FAST ENTRY TRANSACTION (3 TAPS ON MOBILE) -->
+  <div id="modal-fast-entry" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Transaction</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="fast-entry-form">
+        <!-- 1. Party Selector -->
+        <div class="form-group">
+          <label class="form-label">Party (Customer / Supplier) *</label>
+          <select id="entry-party-select" class="form-select" required>
+            <option value="">Select Party...</option>
+          </select>
+        </div>
+
+        <!-- 2. Transaction Type Grid -->
+        <div class="form-group">
+          <label class="form-label">Transaction Type *</label>
+          <div class="type-selector-grid">
+            <button type="button" class="type-btn selected" data-tx-type="credit_sale">Credit Sale (+)</button>
+            <button type="button" class="type-btn" data-tx-type="payment_received">Payment Received (-)</button>
+            <button type="button" class="type-btn" data-tx-type="credit_purchase">Credit Purchase (+)</button>
+            <button type="button" class="type-btn" data-tx-type="payment_made">Payment Made (-)</button>
+            <button type="button" class="type-btn" data-tx-type="sales_return">Sales Return</button>
+            <button type="button" class="type-btn" data-tx-type="purchase_return">Purchase Return</button>
+            <button type="button" class="type-btn" data-tx-type="discount">Discount</button>
+            <button type="button" class="type-btn" data-tx-type="adjustment">Adjustment</button>
+          </div>
+        </div>
+
+        <!-- 3. Amount & Date -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Amount (₹) *</label>
+            <input type="number" id="entry-amount" class="form-input" placeholder="0.00" step="0.01" min="0.01" required style="font-size: 18px; font-weight: 700;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" id="entry-date" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bill / Invoice Reference #</label>
+          <input type="text" id="entry-ref" class="form-input" placeholder="e.g. INV-1024 or Bill #">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Note / Item Details</label>
+          <input type="text" id="entry-note" class="form-input" placeholder="Optional brief note">
+        </div>
+
+        <!-- Invoice Allocation Expander (For Payments) -->
+        <div id="allocations-section" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-sm);">
+          <label class="form-label" style="font-size: 12px;">Allocate to Open Bills / Invoices (Optional)</label>
+          <div id="open-invoices-list" style="font-size: 13px;">
+            <!-- Populated dynamically when party is selected -->
+          </div>
+        </div>
+
+        <!-- Credit Limit Override Warning Box -->
+        <div id="credit-limit-override-box" style="display: none; margin-bottom: 14px; padding: 10px; background: var(--danger-light); border: 1px solid var(--danger); border-radius: var(--radius-sm); color: var(--danger);">
+          <div id="credit-limit-warning-msg" style="font-weight: 700; font-size: 13px;"></div>
+          <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="credit-override-checkbox">
+            <strong>Owner Override: Proceed despite exceeding credit limit</strong>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="font-size: 16px; min-height: 48px;">
+          Save Transaction
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT PARTY -->
+  <div id="modal-party" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="party-modal-title" class="modal-title">Add New Party</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="party-form">
+        <input type="hidden" id="party-id">
+        <div class="form-group">
+          <label class="form-label">Party Name *</label>
+          <input type="text" id="party-name" class="form-input" placeholder="e.g. Rahul Enterprises" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Party Type *</label>
+            <select id="party-type" class="form-select" required>
+              <option value="customer">Customer</option>
+              <option value="supplier">Supplier</option>
+              <option value="both">Both (Dual)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="party-phone" class="form-input" placeholder="e.g. 9876543210">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Credit Limit (₹)</label>
+            <input type="number" id="party-credit-limit" class="form-input" placeholder="0 = No limit" step="1" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Credit Terms (Days)</label>
+            <input type="number" id="party-terms" class="form-input" placeholder="e.g. 15 or 30" step="1" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Opening Balance (₹)</label>
+          <input type="number" id="party-opening-balance" class="form-input" placeholder="0.00" step="0.01">
+          <span style="font-size: 11px; color: var(--text-muted);">
+            Customer: positive (+) = they owe you, negative (-) = advance.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">GSTIN / Tax ID</label>
+          <input type="text" id="party-tax-id" class="form-input" placeholder="e.g. 27ABCDE1234F1Z5">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <input type="text" id="party-address" class="form-input" placeholder="Shop #, Market, City">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Save Party</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD STAFF USER (OWNER ONLY) -->
+  <div id="modal-user" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Staff Account</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="user-create-form">
+        <div class="form-group">
+          <label class="form-label">Staff Full Name *</label>
+          <input type="text" id="new-user-name" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input type="text" id="new-user-username" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password * (min 8 chars)</label>
+          <input type="password" id="new-user-password" class="form-input" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="new-user-role" class="form-select">
+            <option value="staff">Staff (Counter data entry & statements)</option>
+            <option value="owner">Owner (Full administrative control)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create User</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REVERSAL CONFIRMATION (OWNER ONLY) -->
+  <div id="modal-reversal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Reverse Transaction</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <form id="reversal-form">
+        <input type="hidden" id="reverse-tx-id">
+        <p style="font-size: 14px; margin-bottom: 12px;">
+          Transactions are <strong>never deleted or edited in place</strong> to preserve full accounting integrity.
+          Reversing this transaction will create an opposite linked entry and mark the original as struck-through.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Reason for Reversal *</label>
+          <input type="text" id="reverse-note" class="form-input" placeholder="e.g. Wrong amount entered / Mistaken entry" required>
+        </div>
+        <button type="submit" class="btn btn-danger btn-block">Confirm Reversal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCREEN: FIRST RUN OWNER SETUP -->
+  <div id="screen-setup" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="logo-icon" style="margin: 0 auto 10px; width: 48px; height: 48px; font-size: 26px;">ख</div>
+        <h2 style="font-size: 22px;">Welcome to Khata Ledger</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          Set up your master Business Owner account to get started.
+        </p>
+      </div>
+      <form id="setup-form">
+        <div class="form-group">
+          <label class="form-label">Business Name *</label>
+          <input type="text" id="setup-biz-name" class="form-input" placeholder="e.g. Sharma Hardware" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner Full Name *</label>
+          <input type="text" id="setup-full-name" class="form-input" placeholder="e.g. Rajesh Sharma" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input type="text" id="setup-username" class="form-input" placeholder="e.g. rajesh" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password * (min 8 characters)</label>
+          <input type="password" id="setup-password" class="form-input" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="min-height: 48px; font-size: 16px;">
+          Create Owner Account & Launch
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCREEN: LOGIN -->
+  <div id="screen-login" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 400px;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="logo-icon" style="margin: 0 auto 10px; width: 44px; height: 44px; font-size: 22px;">ख</div>
+        <h2 style="font-size: 20px;">Log In to Khata Ledger</h2>
+        <p style="font-size: 13px; color: var(--text-muted);">Digital Account Book</p>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="login-username" class="form-input" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="min-height: 48px; font-size: 16px;">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
