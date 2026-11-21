@@ -250,6 +250,21 @@ async function loadDashboard() {
   }
 }
 
+function renderSegmentedBar(elementId, percentage, fillClass) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const parent = el.classList.contains('segmented-bar') ? el.parentElement : (el.parentElement || el);
+  const totalSegments = 20;
+  const activeCount = Math.round((percentage / 100) * totalSegments);
+  let html = '<div class="segmented-bar">';
+  for (let i = 0; i < totalSegments; i++) {
+    const isFilled = i < activeCount;
+    html += `<div class="segment ${isFilled ? 'filled ' + fillClass : ''}"></div>`;
+  }
+  html += '</div>';
+  parent.innerHTML = html;
+}
+
 function renderAgeing(report) {
   const total = report.total_cents || 1;
   const p0 = Math.min(100, Math.round((report.bucket_0_30 / total) * 100));
@@ -258,16 +273,16 @@ function renderAgeing(report) {
   const p90 = Math.min(100, Math.round((report.bucket_90_plus / total) * 100));
 
   document.getElementById('ageing-0-30').textContent = `${formatMoney(report.bucket_0_30)} (${p0}%)`;
-  document.getElementById('bar-0-30').style.width = `${p0}%`;
+  renderSegmentedBar('bar-0-30', p0, 'fill-success');
 
   document.getElementById('ageing-31-60').textContent = `${formatMoney(report.bucket_31_60)} (${p31}%)`;
-  document.getElementById('bar-31-60').style.width = `${p31}%`;
+  renderSegmentedBar('bar-31-60', p31, '');
 
   document.getElementById('ageing-61-90').textContent = `${formatMoney(report.bucket_61_90)} (${p61}%)`;
-  document.getElementById('bar-61-90').style.width = `${p61}%`;
+  renderSegmentedBar('bar-61-90', p61, 'fill-warning');
 
   document.getElementById('ageing-90-plus').textContent = `${formatMoney(report.bucket_90_plus)} (${p90}%)`;
-  document.getElementById('bar-90-plus').style.width = `${p90}%`;
+  renderSegmentedBar('bar-90-plus', p90, 'fill-accent');
 }
 
 document.getElementById('toggle-ageing-type-btn').addEventListener('click', () => {

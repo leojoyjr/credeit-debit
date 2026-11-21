@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Khata Ledger - Digital Account Book</title>
-  <meta name="description" content="Production-ready digital ledger and credit account book for small businesses.">
+  <title>Khata Ledger (01) — Digital Account Book</title>
+  <meta name="description" content="Production-ready digital ledger in Nothing visual design language.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;800&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -15,27 +18,31 @@
   <!-- App Header -->
   <header class="app-header">
     <div class="logo-area">
-      <div class="logo-icon">ख</div>
+      <div class="logo-icon-nothing">
+        <span class="dot-red"></span>
+        <span class="logo-text-doto">(01)</span>
+      </div>
       <div>
-        <div id="header-business-name" class="logo-title">Khata Ledger</div>
+        <div id="header-business-name" class="logo-title">KHATA // LEDGER</div>
+        <div class="logo-sub">ACCOUNT_SYSTEM.OS</div>
       </div>
     </div>
 
     <div class="header-actions">
       <!-- Dark / Light theme toggle -->
       <button id="theme-toggle-btn" class="btn-icon" aria-label="Toggle Dark / Light Theme" title="Toggle Theme">
-        🌓
+        <span id="theme-icon">◐</span>
       </button>
 
       <!-- User Profile Badge -->
       <div id="user-badge" class="user-badge" style="display: none;">
-        <span id="user-name-display">Leo</span>
+        <span id="user-name-display">LEO</span>
         <span id="user-role-display" class="role-tag role-owner">OWNER</span>
       </div>
 
       <!-- Logout Button -->
       <button id="logout-btn" class="btn-icon" aria-label="Log Out" title="Log Out" style="display: none;">
-        🚪
+        [ EXIT ]
       </button>
     </div>
   </header>
@@ -344,32 +351,30 @@
 
   </main>
 
-  <!-- Bottom Navigation Bar (Mobile First) -->
+  <!-- Bottom Navigation Bar (Nothing Industrial Style) -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-nav="dashboard">
-      <span class="nav-icon">📊</span>
-      <span>Dashboard</span>
+      <span class="nav-dot"></span>
+      <span class="nav-text">DASHBOARD</span>
     </button>
     <button class="nav-item" data-nav="parties">
-      <span class="nav-icon">👥</span>
-      <span>Parties</span>
+      <span class="nav-dot"></span>
+      <span class="nav-text">PARTIES</span>
     </button>
     
-    <!-- Fast-Add 3-Tap FAB in center -->
+    <!-- Nothing Mechanical Fast-Add Button -->
     <button id="fast-add-fab" class="fast-add-fab" aria-label="Fast Entry Transaction" title="Record Transaction">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
+      <span class="fab-plus">+</span>
+      <span class="fab-signal-dot"></span>
     </button>
 
     <button class="nav-item" data-nav="reports">
-      <span class="nav-icon">📈</span>
-      <span>Reports</span>
+      <span class="nav-dot"></span>
+      <span class="nav-text">REPORTS</span>
     </button>
     <button class="nav-item" data-nav="settings">
-      <span class="nav-icon">⚙️</span>
-      <span>Settings</span>
+      <span class="nav-dot"></span>
+      <span class="nav-text">SETTINGS</span>
     </button>
   </nav>
 
